@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "login": "sididiop53@gmail.com",
+      "password": "passer123"
+    }
+  ],
+  "stains": [
+    {
+      "id": 1,
+      "name": "Figma",
+      "completed": false
+    },
+    {
+      "id": 2,
+      "name": "JS",
+      "completed": false
+    },
+    {
+      "id": "4a79",
+      "name": "Angular",
+      "completed": false
+    },
+    {
+      "id": "b98b",
+      "name": "OFMS",
+      "completed": true
+    }
+  ]
+}
