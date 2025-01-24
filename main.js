@@ -2,8 +2,8 @@ import { postData, getData, patchData, deleteData } from './fetch/fetch.js';
 import { isAuthenticated, checkAuthentication } from './auth/auth1.js';
 
 let stains = [];
-let currentTheme = 'auto';
-
+let editMode = false;
+let editId = null;
 
 const addStainModal = document.getElementById('addStainModal');
 const confirmDialog = document.getElementById('confirmDialog');
@@ -37,14 +37,25 @@ function filterAndRenderStains() {
         );
     }
 
-    // Trier les stains par leur propriété 'order'
     filteredStains.sort((a, b) => a.order - b.order);
-
     renderStainsList(filteredStains);
 }
 
 function renderStainsList(stainsToRender) {
     const tbody = document.getElementById('stainsList');
+       // Si la liste est vide, afficher une image vide
+       if (stainsToRender.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center py-4">
+                    <img src="./asset/empty_image.png" alt="No stains available" class="mx-auto w-32 h-32">
+                    <p class="text-red-500 mt-2">Aucune tache disponible!</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
     tbody.innerHTML = stainsToRender
         .map(stain => `
         <tr class="${stain.completed ? 'bg-gray-50' : ''}" 
@@ -139,6 +150,18 @@ async function saveStainName(id, newName) {
     }
 }
 
+// Edit avec icone pencil
+window.editStain = async function (id){
+
+    editMode = true;
+    editId = id;
+
+    const stain = stains.find(s => s.id == id);
+    if (!stain) return;
+    document.getElementById("newStainName").value = stain.name;
+    addStainModal.classList.remove('hidden');
+    
+}
 // Delete stain
 window.showDeleteConfirmation = function (id) {
     confirmDialog.classList.remove('hidden');
@@ -178,19 +201,31 @@ document.getElementById('submitStain').addEventListener('click', async () => {
     if (name) {
         try {
             
-            stains = await getData('stains');
-            console.log(stains.length);
-            // Trouver le prochain ID disponible
-            const nextId = String(stains.length + 1);
-            console.log(nextId);
-            // Ajouter la nouvelle tâche avec un ID numérique
-            await postData('stains', { id: nextId, name, completed: false, order: stains.length + 1  });
+            if (editMode) {
+                // Mode modification
+                await saveStainName(editId, name);
+                console.log(`Stain with ID ${editId} updated successfully.`);
+            } else {
+                // Mode ajout
+                const stains = await getData('stains');
+                const nextId = String(stains.length + 1);
+                await postData('stains', {
+                    id: nextId,
+                    name,
+                    completed: false,
+                    order: stains.length + 1,
+                });
+                console.log(`Stain with ID ${nextId} added successfully.`);
+            }
          
             document.getElementById('newStainName').value = '';
             addStainModal.classList.add('hidden');
 
             // Recharger la liste des tâches
             await loadStains();
+
+            editMode = false;
+            editId = null;
         } catch (error) {
             console.error('Error adding stain:', error);
         }
@@ -237,37 +272,6 @@ window.drop = async function (event) {
 }
 
 
-// Theme toggling
-//stocker le theme dans le localStorage
-window.localStorage.setItem('theme', currentTheme);
-
-// charger le theme dans le localStorage
-if (window.localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark');
-    themeToggle.textContent = '🌞';
-} else {
-    themeToggle.textContent = '🌙';
-}
-function toggleTheme() {
-    const body = document.body;
-    console.log(body.innerHTML);
-    
-    if (currentTheme === 'auto') {
-        currentTheme = 'dark';
-        body.classList.add('dark');
-        themeToggle.textContent = '🌙';
-    } else if (currentTheme === 'dark') {
-        currentTheme = 'light';
-        body.classList.remove('dark');
-        themeToggle.textContent = '🌞';
-    } else {
-        currentTheme = 'auto';
-        body.classList.remove('dark');
-        themeToggle.textContent = '🌞/🌙';
-    }
-}
-
-themeToggle.addEventListener('click', toggleTheme);
 
 // Initial load
 loadStains();

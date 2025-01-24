@@ -1,0 +1,17 @@
+body.light {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+body.dark {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+button#themeToggle {
+    cursor: pointer;
+    padding: 0.5em;
+    font-size: 1.2em;
+    border: none;
+    background: none;
+}

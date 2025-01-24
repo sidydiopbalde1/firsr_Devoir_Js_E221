@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Toggle</title>
+    <style>
+        body {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.light {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        body.dark {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .theme-toggle {
+            cursor: pointer;
+            padding: 10px 20px;
+            background-color: #ddd;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body class="light">
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+
+    <script>
+        // Initialisation
+        const themeToggle = document.getElementById('themeToggle');
+        let currentTheme = window.localStorage.getItem('theme') || 'auto';
+
+        function applyTheme(theme) {
+            const body = document.body;
+
+            if (theme === 'dark') {
+                body.classList.add('dark');
+                body.classList.remove('light');
+                themeToggle.textContent = '🌞'; // Icône pour revenir au mode clair
+            } else if (theme === 'light') {
+                body.classList.add('light');
+                body.classList.remove('dark');
+                themeToggle.textContent = '🌙'; // Icône pour passer au mode sombre
+            } else {
+                // Mode automatique (par défaut, basé sur les préférences système)
+                const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                body.classList.toggle('dark', isSystemDark);
+                body.classList.toggle('light', !isSystemDark);
+                themeToggle.textContent = '🌞/🌙'; // Icône pour mode automatique
+            }
+        }
+
+        function toggleTheme() {
+            if (currentTheme === 'auto') {
+                currentTheme = 'dark';
+            } else if (currentTheme === 'dark') {
+                currentTheme = 'light';
+            } else {
+                currentTheme = 'auto';
+            }
+
+            // Appliquer le thème et le sauvegarder dans localStorage
+            applyTheme(currentTheme);
+            window.localStorage.setItem('theme', currentTheme);
+        }
+
+        // Appliquer le thème au chargement de la page
+        applyTheme(currentTheme);
+
+        // Ajouter un événement au bouton de bascule
+        themeToggle.addEventListener('click', toggleTheme);
+    </script>
+</body>
+</html>
