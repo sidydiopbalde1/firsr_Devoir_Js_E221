@@ -11,7 +11,7 @@
       "id": "1",
       "name": "Symfony php",
       "completed": false,
-      "order": 4
+      "order": 0
     },
     {
       "id": "2",
@@ -29,7 +29,7 @@
       "id": "5",
       "name": "Maguette",
       "completed": false,
-      "order": 0
+      "order": 4
     },
     {
       "id": "5",

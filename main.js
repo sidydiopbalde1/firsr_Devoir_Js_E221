@@ -43,13 +43,13 @@ function filterAndRenderStains() {
 
 function renderStainsList(stainsToRender) {
     const tbody = document.getElementById('stainsList');
-       // Si la liste est vide, afficher une image vide
-       if (stainsToRender.length === 0) {
+    // Si la liste est vide, afficher une image vide
+    if (stainsToRender.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="4" class="text-center py-4">
                     <img src="./asset/empty_image.png" alt="No stains available" class="mx-auto w-32 h-32">
-                    <p class="text-red-500 mt-2">Aucune tache disponible!</p>
+                    <p class="text-red-500 dark:text-red-400 mt-2">Aucune tache disponible!</p>
                 </td>
             </tr>
         `;
@@ -58,7 +58,7 @@ function renderStainsList(stainsToRender) {
 
     tbody.innerHTML = stainsToRender
         .map(stain => `
-        <tr class="${stain.completed ? 'bg-gray-50' : ''}" 
+        <tr class="border-b dark:border-gray-700 ${stain.completed ? 'bg-gray-50 dark:bg-gray-900' : 'bg-white dark:bg-gray-800'}" 
             data-id="${stain.id}" 
             draggable="true" 
             ondragstart="startDrag(event)"
@@ -67,24 +67,25 @@ function renderStainsList(stainsToRender) {
             <td class="py-2 px-4">
                 <input type="checkbox" ${stain.completed ? 'checked' : ''} 
                     onchange="toggleStainCompletion(${stain.id})"
-                    class="w-4 h-4">
+                    class="w-4 h-4 accent-blue-500 dark:accent-blue-400">
             </td>
-            <td class="py-2 px-4 stain-name ${stain.completed ? 'line-through text-gray-500' : ''}" 
+            <td class="py-2 px-4 stain-name ${stain.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}" 
                 ondblclick="startEditingStain(${stain.id})" data-id="${stain.id}">
                 ${stain.name}
             </td>
             <td class="py-2 px-4">
-                <span class="px-2 py-1 rounded text-sm ${stain.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                <span class="px-2 py-1 rounded text-sm ${stain.completed ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-400'}">
                     ${stain.completed ? 'Complete' : 'Incomplete'}
                 </span>
             </td>
             <td class="py-2 px-4">
-                <button onclick="editStain(${stain.id})" class="mr-2 hover:text-blue-600">✏️</button>
-                <button onclick="showDeleteConfirmation(${stain.id})" class="text-red-500 hover:text-red-600">🗑️</button>
+                <button onclick="editStain(${stain.id})" class="mr-2 hover:text-blue-600 dark:hover:text-blue-400">✏️</button>
+                <button onclick="showDeleteConfirmation(${stain.id})" class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500">🗑️</button>
             </td>
         </tr>
     `).join('');
 }
+
 
 
 // Toggle stain completion
