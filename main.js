@@ -36,6 +36,9 @@ function filterAndRenderStains() {
         );
     }
 
+    // Trier les stains par leur propriété 'order'
+    filteredStains.sort((a, b) => a.order - b.order);
+
     renderStainsList(filteredStains);
 }
 
@@ -199,13 +202,15 @@ window.drop = async function (event) {
 
     if (draggedIndex === -1 || droppedIndex === -1) return;
 
-    // Swap in local list
-    [stains[draggedIndex], stains[droppedIndex]] = [stains[droppedIndex], stains[draggedIndex]];
+    // Mettre à jour les valeurs 'order'
+    const tempOrder = stains[draggedIndex].order;
+    stains[draggedIndex].order = stains[droppedIndex].order;
+    stains[droppedIndex].order = tempOrder;
 
     try {
-        // Update each stain's order individually
-        await patchData(`stains/${stains[draggedIndex].id}`, { order: draggedIndex  });
-        await patchData(`stains/${stains[droppedIndex].id}`, { order: droppedIndex  });
+        // Mettre à jour les deux stains avec leurs nouveaux ordres
+        await patchData(`stains/${stains[draggedIndex].id}`, { order: stains[draggedIndex].order });
+        await patchData(`stains/${stains[droppedIndex].id}`, { order: stains[droppedIndex].order });
 
         filterAndRenderStains();
     } catch (error) {
