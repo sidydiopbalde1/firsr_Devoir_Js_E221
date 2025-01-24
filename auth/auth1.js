@@ -1,11 +1,5 @@
 import { getData } from "../fetch/fetch.js";
 
-/**
- * Vérifie les credentials de l'utilisateur.
- * @param {string} email - L'adresse email de l'utilisateur.
- * @param {string} password - Le mot de passe de l'utilisateur.
- * @returns {Promise<boolean>} - Retourne `true` si les credentials sont valides, sinon lève une erreur.
- */
 async function verifierCredentials(email, password) {
     try {
         console.log("Vérification des credentials...");
@@ -18,7 +12,6 @@ async function verifierCredentials(email, password) {
             throw new Error("Identifiants incorrects");
         }
 
-        // Stocker l'utilisateur connecté dans le localStorage
         localStorage.setItem("user", JSON.stringify(etudiant));
         return true;
     } catch (error) {
@@ -27,10 +20,6 @@ async function verifierCredentials(email, password) {
     }
 }
 
-/**
- * Gère la soumission du formulaire de connexion.
- * @param {Event} event - L'événement de soumission du formulaire.
- */
 async function connexion(event) {
     event.preventDefault();
 
@@ -40,7 +29,6 @@ async function connexion(event) {
     try {
         const estValide = await verifierCredentials(email, password);
         if (estValide) {
-            // Rediriger l'utilisateur vers la page principale
             window.location.href = "index.html";
         }
     } catch (error) {
@@ -51,39 +39,30 @@ async function connexion(event) {
     }
 }
 
-/**
- * Vérifie si un utilisateur est connecté.
- * @returns {boolean} - Retourne `true` si l'utilisateur est connecté, sinon `false`.
- */
 export function estConnecte() {
     const utilisateur = localStorage.getItem("user");
     return utilisateur !== null && utilisateur !== "undefined";
 }
 
-/**
- * Déconnecte l'utilisateur.
- */
 export function deconnexion() {
     localStorage.removeItem("user");
     window.location.href = "login.html";
 }
 
-/**
- * Protège l'accès aux pages nécessitant une connexion.
- */
 function protegerPage() {
     const currentPage = window.location.pathname.split("/").pop();
     const isLoginPage = currentPage === "login.html";
 
     if (!estConnecte() && !isLoginPage) {
-        // Redirige vers la page de connexion uniquement si on n'est pas déjà dessus
         window.location.href = "login.html";
+    }
+
+    if (estConnecte() && isLoginPage) {
+        window.location.href = "index.html";
     }
 }
 
-// Ajouter les événements lorsque la page est chargée
 document.addEventListener("DOMContentLoaded", () => {
-    // Gestion du formulaire de connexion
     const form = document.getElementById("loginForm");
     if (form) {
         form.addEventListener("submit", connexion);
@@ -92,18 +71,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Protéger les pages nécessitant une connexion
     protegerPage();
 
-    // Empêcher l'utilisateur de revenir à une page protégée après déconnexion
     window.addEventListener("popstate", () => {
-        if (!estConnecte()) {
-            window.location.href = "login.html";
-        }
+        protegerPage(); 
     });
 });
 
-// Ajouter l'événement de déconnexion au bouton
 const logoutButton = document.getElementById("logoutBtn");
 if (logoutButton) {
     logoutButton.addEventListener("click", deconnexion);
 }
+const isAuthenticated = () => {
+    return localStorage.getItem('user') !== null;
+};
 
-export { verifierCredentials, connexion };
+function checkAuthentication() {
+    if (!isAuthenticated()) {
+        window.location.href = '/login.html';
+    }
+}
+export { verifierCredentials, connexion ,isAuthenticated,checkAuthentication };

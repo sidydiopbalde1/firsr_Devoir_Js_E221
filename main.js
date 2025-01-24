@@ -1,17 +1,18 @@
 import { postData, getData, patchData, deleteData } from './fetch/fetch.js';
+import { isAuthenticated, checkAuthentication } from './auth/auth1.js';
 
-// State management
 let stains = [];
 let currentTheme = 'auto';
 
-// DOM Elements
+
 const addStainModal = document.getElementById('addStainModal');
 const confirmDialog = document.getElementById('confirmDialog');
 const themeToggle = document.getElementById('themeToggle');
 
-// Load and render stains
+checkAuthentication();
+
 async function loadStains() {
-   
+    checkAuthentication();
     try {
         stains = await getData('stains');
         if (!stains) throw new Error('Failed to fetch stains');
@@ -77,6 +78,7 @@ function renderStainsList(stainsToRender) {
 
 // Toggle stain completion
 window.toggleStainCompletion = async function (id) {
+    checkAuthentication();
     try {
         const stain = stains.find(s => s.id == id);
         if (!stain) throw new Error(`Stain with id ${id} not found`);
@@ -119,6 +121,7 @@ window.startEditingStain = function (id) {
 
 // Save the updated name
 async function saveStainName(id, newName) {
+    
     const stain = stains.find(s => s.id == id);
 
     if (!stain || newName.trim() === '') return;
@@ -171,17 +174,33 @@ document.getElementById('closeAddModal').addEventListener('click', () => {
 
 document.getElementById('submitStain').addEventListener('click', async () => {
     const name = document.getElementById('newStainName').value;
+
     if (name) {
         try {
-            await postData(`stains`, { name, completed: false });
+            
+            stains = await getData('stains');
+            console.log(stains.length);
+            // Trouver le prochain ID disponible
+            const nextId = String(stains.length + 1);
+            console.log(nextId);
+            // Ajouter la nouvelle tâche avec un ID numérique
+            await postData('stains', { id: nextId, name, completed: false, order: stains.length + 1  });
+         
             document.getElementById('newStainName').value = '';
             addStainModal.classList.add('hidden');
+
+            // Recharger la liste des tâches
             await loadStains();
         } catch (error) {
             console.error('Error adding stain:', error);
         }
+    }else{
+        const errorMessage = document.getElementById('errorMessageaddStainModal');
+        errorMessage.classList.remove('hidden');
+        errorMessage.textContent = 'Please enter a name for the stain.';
     }
 });
+
 
 // Drag and drop handling
  window.startDrag= function (event) {
@@ -202,13 +221,11 @@ window.drop = async function (event) {
 
     if (draggedIndex === -1 || droppedIndex === -1) return;
 
-    // Mettre à jour les valeurs 'order'
     const tempOrder = stains[draggedIndex].order;
     stains[draggedIndex].order = stains[droppedIndex].order;
     stains[droppedIndex].order = tempOrder;
 
     try {
-        // Mettre à jour les deux stains avec leurs nouveaux ordres
         await patchData(`stains/${stains[draggedIndex].id}`, { order: stains[draggedIndex].order });
         await patchData(`stains/${stains[droppedIndex].id}`, { order: stains[droppedIndex].order });
 
@@ -221,8 +238,20 @@ window.drop = async function (event) {
 
 
 // Theme toggling
+//stocker le theme dans le localStorage
+window.localStorage.setItem('theme', currentTheme);
+
+// charger le theme dans le localStorage
+if (window.localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+    themeToggle.textContent = '🌞';
+} else {
+    themeToggle.textContent = '🌙';
+}
 function toggleTheme() {
     const body = document.body;
+    console.log(body.innerHTML);
+    
     if (currentTheme === 'auto') {
         currentTheme = 'dark';
         body.classList.add('dark');
